@@ -1,6 +1,7 @@
 package com.codemybrainsout.ratingdialog;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.PorterDuff;
@@ -10,9 +11,6 @@ import android.graphics.drawable.LayerDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.graphics.drawable.DrawableCompat;
-import android.support.v7.app.AppCompatDialog;
 import android.text.TextUtils;
 import android.util.TypedValue;
 import android.view.View;
@@ -25,6 +23,10 @@ import android.widget.LinearLayout;
 import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatDialog;
+import androidx.core.content.ContextCompat;
+import androidx.core.graphics.drawable.DrawableCompat;
 
 /**
  * Created by ahulr on 24-10-2016.
@@ -130,6 +132,9 @@ public class RatingDialog extends AppCompatDialog implements RatingBar.OnRatingB
                 DrawableCompat.setTint(stars, ContextCompat.getColor(context, builder.ratingBarColor));
             }
         }
+        if(builder.onDismissListener != null) {
+            setOnDismissListener(builder.onDismissListener);
+        }
 
         Drawable d = context.getPackageManager().getApplicationIcon(context.getApplicationInfo());
         ivIcon.setImageDrawable(builder.drawable != null ? builder.drawable : d);
@@ -175,17 +180,13 @@ public class RatingDialog extends AppCompatDialog implements RatingBar.OnRatingB
             showNever();
 
         } else if (view.getId() == R.id.dialog_rating_button_feedback_cancel) {
-
             dismiss();
-
         }
 
     }
 
     @Override
     public void onRatingChanged(RatingBar ratingBar, float v, boolean b) {
-
-
         if (ratingBar.getRating() >= threshold) {
             thresholdPassed = true;
 
@@ -281,10 +282,17 @@ public class RatingDialog extends AppCompatDialog implements RatingBar.OnRatingB
 
     @Override
     public void show() {
-
         if (checkIfSessionMatches(session)) {
             super.show();
         }
+    }
+
+    public Boolean showWithResult() {
+        if (checkIfSessionMatches(session)) {
+            super.show();
+            return true;
+        }
+        return false;
     }
 
     private boolean checkIfSessionMatches(int session) {
@@ -304,18 +312,18 @@ public class RatingDialog extends AppCompatDialog implements RatingBar.OnRatingB
         if (session == count) {
             SharedPreferences.Editor editor = sharedpreferences.edit();
             editor.putInt(SESSION_COUNT, 1);
-            editor.commit();
+            editor.apply();
             return true;
         } else if (session > count) {
             count++;
             SharedPreferences.Editor editor = sharedpreferences.edit();
             editor.putInt(SESSION_COUNT, count);
-            editor.commit();
+            editor.apply();
             return false;
         } else {
             SharedPreferences.Editor editor = sharedpreferences.edit();
             editor.putInt(SESSION_COUNT, 2);
-            editor.commit();
+            editor.apply();
             return false;
         }
     }
@@ -324,7 +332,7 @@ public class RatingDialog extends AppCompatDialog implements RatingBar.OnRatingB
         sharedpreferences = context.getSharedPreferences(MyPrefs, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedpreferences.edit();
         editor.putBoolean(SHOW_NEVER, true);
-        editor.commit();
+        editor.apply();
     }
 
     public static class Builder {
@@ -338,6 +346,7 @@ public class RatingDialog extends AppCompatDialog implements RatingBar.OnRatingB
         private RatingThresholdFailedListener ratingThresholdFailedListener;
         private RatingDialogFormListener ratingDialogFormListener;
         private RatingDialogListener ratingDialogListener;
+        private DialogInterface.OnDismissListener onDismissListener;
         private Drawable drawable;
 
         private int session = 1;
@@ -453,6 +462,11 @@ public class RatingDialog extends AppCompatDialog implements RatingBar.OnRatingB
 
         public Builder onRatingBarFormSumbit(RatingDialogFormListener ratingDialogFormListener) {
             this.ratingDialogFormListener = ratingDialogFormListener;
+            return this;
+        }
+
+        public Builder onDialogDismissListener(DialogInterface.OnDismissListener onDismissListener) {
+            this.onDismissListener = onDismissListener;
             return this;
         }
 

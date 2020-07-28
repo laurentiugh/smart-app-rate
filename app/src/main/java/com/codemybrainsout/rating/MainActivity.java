@@ -1,10 +1,14 @@
 package com.codemybrainsout.rating;
 
+import android.content.DialogInterface;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
+
+import androidx.appcompat.app.AppCompatActivity;
+
 import android.util.Log;
 import android.view.View;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 import com.codemybrainsout.ratingdialog.RatingDialog;
 
@@ -18,7 +22,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        rlRate = (RelativeLayout) findViewById(R.id.rlRate);
+        rlRate = findViewById(R.id.rlRate);
         rlRate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -33,16 +37,22 @@ public class MainActivity extends AppCompatActivity {
                 .session(3)
                 .threshold(3)
                 .ratingBarColor(R.color.yellow)
+                .positiveButtonText("Later")
+                .negativeButtonText("Never")
                 .playstoreUrl("https://github.com/codemybrainsout/smart-app-rate")
                 .onRatingBarFormSumbit(new RatingDialog.Builder.RatingDialogFormListener() {
                     @Override
                     public void onFormSubmitted(String feedback) {
-                        Log.i(TAG,"Feedback:" + feedback);
+                        Log.i(TAG, "Feedback:" + feedback);
+                    }
+                }).onDialogDismissListener(new DialogInterface.OnDismissListener() {
+                    @Override
+                    public void onDismiss(DialogInterface dialog) {
+                        Toast.makeText(MainActivity.this, "dismissed!", Toast.LENGTH_SHORT).show();
                     }
                 })
                 .build();
-
-
-        ratingDialog.show();
+        boolean result = ratingDialog.showWithResult();
+        Toast.makeText(this, "showResult: " + result, Toast.LENGTH_SHORT).show();
     }
 }
