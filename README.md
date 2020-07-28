@@ -95,11 +95,22 @@ final RatingDialog ratingDialog = new RatingDialog.Builder(this)
 ## Installation
 
 ### Gradle
+
+Add the JitPack repository to your build file
+```groovy
+	allprojects {
+		repositories {
+			...
+			maven { url 'https://jitpack.io' }
+		}
+	}
+```
+
 Add it as a dependency in your app's build.gradle file
 
 ```groovy
 dependencies {
-    compile 'com.codemybrainsout.rating:ratingdialog:1.0.8'
+    implementation 'com.github.laurentiugh:smart-app-rate:1.0.9'
 }
 ```
 
